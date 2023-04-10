@@ -1,38 +1,44 @@
-# create-svelte
+# AWS Place
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+Fully serverless implemenations of reddits r/place built using AWS managed services.
+demo at https://place.eslamira.com/
 
-## Creating a project
+## Deploying backend services
 
-If you're seeing this, you've probably already done this step. Congrats!
+1. Create an access key in AWS IAM and update terraform/main.tf.
+2. Run the following commands
 
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
+# initialise terraform
+terraform init
 
-# create a new project in my-app
-npm create svelte@latest my-app
+# deploy backend services
+terraform apply
 ```
 
-## Developing
+## Setting up front end
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Once the backend has been initialized. Create a file called aws-exports.js in the src folder.
+Add the following to the file
 
 ```bash
+const awsmobile = {
+    "aws_project_region": "us-east-2",
+    "aws_appsync_graphqlEndpoint": "OBTAIN FROM APPSYNC",
+    "aws_appsync_region": "us-east-2",
+    "aws_appsync_authenticationType": "API_KEY",
+    "aws_appsync_apiKey": "OBTAIN FROM APPSYNC",
+    "aws_cognito_region": "us-east-2",
+    "aws_user_pools_id": "OBTAIN FROM COGNITO",
+    "aws_user_pools_web_client_id": "OBTAIN FROM COGNITO",
+};
+
+export default awsmobile;
+```
+Obtain the required endpoint, keys and ids from the respective AWS services in the AWS console or use terraform state show command.
+
+run the follwing commands
+```bash
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
