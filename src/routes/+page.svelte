@@ -22,7 +22,7 @@
     let canvasParent;
     let x = 0;
     let y = 0;  
-    let isDesktop = "hidden";
+
     let time = 0
 
     onMount(async () => {
@@ -31,6 +31,9 @@
             initialZoom: 0.15,
             initialX: 2000,
             initialY: 2000,
+            onClick: (event) => {
+                sendUpdateRequest()
+            }
         })
       
         ctx = canvas.getContext("2d", {
@@ -70,12 +73,6 @@
                 updatePixel(updatedPixel.x, updatedPixel.y, updatedPixel.color)
             } 
         })
-        
-
-        // checking for touch device
-        if ("maxTouchPoints" in navigator && navigator.maxTouchPoints > 0) {
-            isDesktop = " "
-        }
 
         // checking if user is signed in
         Auth.currentAuthenticatedUser()
@@ -83,14 +80,10 @@
                 $user = value;
                 console.log($user)
             })
+            .catch(console.log)
 
         return () => sub.unsubscribe()
     })
-
-    function getRelativeCoords(event) {
-        x = Math.floor(event.offsetX / 4)
-        y = Math.floor(event.offsetY / 4)
-    }
 
     function sendUpdateRequest() {
         if (time > 0) {
@@ -127,8 +120,15 @@
                 updatePixel(x, y, currentColor)
             }
             ).catch(() => {
-                alert("Must be logged in to update the board!")
+                alert(`Must be logged in to update the board!`)
+                clearInterval(interval)
+                time = 0
             })
+    }
+
+    function getRelativeCoords(event) {
+        x = Math.floor(event.offsetX / 4)
+        y = Math.floor(event.offsetY / 4)
     }
 
     function updatePixel(x, y, color) {
@@ -136,24 +136,8 @@
         ctx.fillStyle = colors[color]
         ctx.fillRect(x, y, 1,1)
     }
-
-    const delta = 10;
-    let startX;
-    let startY;
-    // preventing click on drag
-    function mousedown(event) {
-        startX = event.pageX;
-        startY = event.pageY;
-    }
-    function mouseup(event) {
-        const diffX = Math.abs(event.pageX - startX);
-        const diffY = Math.abs(event.pageY - startY);
-        if (diffX < delta && diffY < delta) sendUpdateRequest()
-    }
 </script>
  
-
-
 
 <div class="flex flex-col justify-between  absolute inset-0 bg-neutral-700 overflow-hidden">
     <div class="z-10 flex flex-col items-center pointer-events-none">
@@ -185,14 +169,9 @@
         </div>
     </div>
 </div>
-<div class={"flex items-center justify-center fixed inset-0 bg-gray-600 bg-opacity-80 overflow-y-auto h-full w-full " + isDesktop} >   
-    <div class="text-center">
-        <h1 class="font-bold text-4xl p-2 rounded-md m-2 bg-neutral-700 text-red-400 select-none cursor-default">Touch devices are not supported currently :(</h1>
-    </div>
-</div>
 <div class="flex items-center justify-center fixed inset-0 h-full w-full" >
     <div bind:this={canvasParent}>
-        <canvas width={1000} height={1000} bind:this={canvas} on:mousedown={mousedown} on:mouseup={mouseup} on:pointermove={getRelativeCoords} class="h-4/6"/>
+        <canvas width={1000} height={1000} bind:this={canvas} on:pointerdown={getRelativeCoords} on:pointermove={getRelativeCoords} class="h-4/6"/>
     </div>
 </div>
 
