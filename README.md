@@ -15,6 +15,7 @@ terraform init
 # deploy backend services
 terraform apply
 ```
+3. run the setupPlaceChunks lambda function to initiallize the board / reset the board
 
 ## Setting up front end
 
